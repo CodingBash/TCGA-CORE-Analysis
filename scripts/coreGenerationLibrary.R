@@ -9,24 +9,28 @@ library(CORE)
 #
 absoluteToChromosomeBPConversion <- function(outputCores, chromosomeSizes){
   for(row.index in seq(1, nrow(outputCores))){
-    chrom_r <- as.numeric(outputCores[row.index, ]$chrom)
+    chrom_r <- as.numeric(outputCores[row.index, ][[1]])
     total_bp <- 0
-    if(chrom_r %in% seq(2,22)){
+    if(chrom_r == 1){
+      # DO NOTHING since chrom 1 already in chromosome units
+    } else if(chrom_r %in% seq(2,22)){
       for(i in seq(1, as.numeric(chrom_r) - 1)){
         total_bp <- total_bp + chromosomeSizes[paste("chr", i, sep = ""), ]$size
       }  
-    } else if (chrom_r == "X") {
+    } else if (chrom_r == "X" || chrom_r == 23) {
       for(i in seq(1, 22)){
         total_bp <- total_bp + chromosomeSizes[paste("chr", i, sep = ""), ]$size
       }  
-    }  else if (chrom_r == "Y") {
+    }  else if (chrom_r == "Y" || chrom_r == 24) {
       for(i in seq(1, 22)){
         total_bp <- total_bp + chromosomeSizes[paste("chr", i, sep = ""), ]$size
       }  
       total_bp <- total_bp + chromosomeSizes["chrX", ]$size
+    } else {
+      print(paste0("WARNING: Unable to convert to chromsome units for chrom: ", chrom_r))
     }
-    outputCores[row.index, ]$start <- outputCores[row.index, ]$start - total_bp
-    outputCores[row.index, ]$end <- outputCores[row.index, ]$end - total_bp
+    outputCores[row.index, ][[2]] <- outputCores[row.index, ][[2]] - total_bp
+    outputCores[row.index, ][[3]] <- outputCores[row.index, ][[3]] - total_bp
   }
   return(outputCores)
 }
